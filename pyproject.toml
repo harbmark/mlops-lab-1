@@ -8,12 +8,24 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "fastapi>=0.141.1",
     "mlflow>=3.16.0",
     "pillow>=12.3.0",
+    "python-multipart>=0.0.32",
     "scikit-learn>=1.7.2",
     "torch>=2.11.0",
     "torchvision>=0.26.0",
+    "uvicorn>=0.53.0",
 ]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+torchvision = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [project.scripts]
 mlops-lab-1 = "mlops_lab_1:main"
@@ -21,12 +33,3 @@ mlops-lab-1 = "mlops_lab_1:main"
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
 build-backend = "uv_build"
-
-[[tool.uv.index]]
-name = "pytorch-cuda"
-url = "https://download.pytorch.org/whl/cu128"
-explicit = true
-
-[tool.uv.sources]
-torch = { index = "pytorch-cuda" }
-torchvision = { index = "pytorch-cuda" }
