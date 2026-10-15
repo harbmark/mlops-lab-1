@@ -9,6 +9,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
+ENV UV_HTTP_TIMEOUT=120
+
 # Copy ONLY the dependency manifests first. Docker caches each layer by
 # its inputs — as long as these files don't change, this layer (and
 # the potentially slow `uv sync`) is reused on every rebuild, even if
