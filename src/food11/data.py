@@ -21,7 +21,7 @@ MINI_LIMIT = 100
 def category_from_filename(filename: str) -> str:
     """'3_120.jpg' -> 'Egg'"""
     cat_id = int(Path(filename).stem.split("_")[0])
-    return CATEGORIES[cat_id]
+    return CATEGORIES[(cat_id + 1) % 11]
 
 
 def resize_image(img: Image.Image, size: int = 128) -> Image.Image:
