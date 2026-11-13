@@ -1,6 +1,6 @@
 from pathlib import Path
+
 from PIL import Image
-import shutil
 
 CATEGORIES = {
     0: "Bread", 1: "Dairy product", 2: "Dessert", 3: "Egg",
@@ -8,12 +8,25 @@ CATEGORIES = {
     8: "Seafood", 9: "Soup", 10: "Vegetable-Fruit",
 }
 
+CLASSES = [CATEGORIES[i] for i in range(11)]
+
 RAW_DIR = Path("data/food11_raw")
 PROCESSED_DIR = Path("data/food11_processed")
 MINI_DIR = Path("data/food11_processed_mini")
 SPLITS = ["training", "evaluation", "validation"]
 TARGET_SIZE = (128, 128)
 MINI_LIMIT = 100
+
+
+def category_from_filename(filename: str) -> str:
+    """'3_120.jpg' -> 'Egg'"""
+    cat_id = int(Path(filename).stem.split("_")[0])
+    return CATEGORIES[cat_id]
+
+
+def resize_image(img: Image.Image, size: int = 128) -> Image.Image:
+    """Returns an RGB image of size x size."""
+    return img.convert("RGB").resize((size, size))
 
 
 def process_split(split: str, dst_root: Path, limit: int | None):
@@ -32,8 +45,7 @@ def process_split(split: str, dst_root: Path, limit: int | None):
         dst_dir.mkdir(parents=True, exist_ok=True)
 
         with Image.open(img_path) as im:
-            im = im.resize(TARGET_SIZE)
-            im.save(dst_dir / img_path.name)
+            resize_image(im, TARGET_SIZE[0]).save(dst_dir / img_path.name)
 
         counts[cat_id] += 1
 

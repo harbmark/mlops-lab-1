@@ -1,18 +1,20 @@
 import io
 import os
+from typing import Annotated
 
-import mlflow
 import mlflow.pyfunc
 import numpy as np
 import torch
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image
 from torchvision import transforms
+
+import mlflow
 
 # The model was trained/logged on a CUDA machine, so its checkpoint stores
 # tensors tagged for a CUDA device. This container is CPU-only, so we force
 # every torch.load call to remap storages to CPU regardless of what device
-# they were originally saved on — mlflow.pyfunc.load_model doesn't expose a
+# they were originally saved on. mlflow.pyfunc.load_model doesn't expose a
 # map_location kwarg directly, so this patches the underlying loader it uses.
 _original_torch_load = torch.load
 
@@ -53,6 +55,8 @@ model = None
 @app.on_event("startup")
 def load_model():
     global model
+    if os.environ.get("SKIP_MODEL"):
+        return
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     model = mlflow.pyfunc.load_model("models:/food11@champion")
 
@@ -63,7 +67,10 @@ def health():
 
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+async def predict(file: Annotated[UploadFile, File()]):
+    if model is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
